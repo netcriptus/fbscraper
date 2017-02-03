@@ -15,8 +15,8 @@ def photo_tags(post_id)
   begin
     @client.get_connections(post_id, 'tags', {fields: ['id']})
   rescue
-    # not all photos have tags resources.
-    # Sometimes Facbeook will return [], sometimes raise an Exception.
+    # not all photos have tags resource.
+    # Sometimes Facbeook will return [], sometimes raise an Exception. Go figure.
     []
   end
 end
@@ -37,14 +37,17 @@ STDIN.each_line do |line|
     progressbar.increment
     common_info = "#{page_id},#{post['id'].split('_')[1]},#{post['type']}"
 
+    # Get reactions
     post_reactions(post['id']).each do |reaction|
       output.write("#{reaction['id']},#{common_info},reaction,#{reaction['type']}\n")
     end
 
+    # Get comments
     post_comments(post['id']).each do |comment|
       output.write("#{comment['from']['id']},#{common_info},comment\n")
     end
 
+    # If a post is a photo, look for tags
     if post['type'] == 'photo'
       photo_tags(post['id'].split('_')[1]).each do |tag|
         output.write("#{tag['id']},#{common_info},tag\n")
