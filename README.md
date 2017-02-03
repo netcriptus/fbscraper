@@ -10,4 +10,4 @@ Then provide the input in the format `<page_id>,<post_limit>`. The bot will keep
 
 For a quick test, you can run
 
-```ruby scraper.rb < tests/small_input.txt```
+```ruby scraper.rb < small_input.txt```

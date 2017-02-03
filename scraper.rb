@@ -10,8 +10,18 @@ def page_posts(page_id, limit)
   @client.get_connections(page_id, 'posts', {limit: limit, fields:['type']})
 end
 
+def photo_tags(post_id)
+  begin
+    @client.get_connections(post_id, 'tags')
+  rescue
+    # not all photos have tags resources.
+    # Sometimes Facbeook will return [], sometimes raise an Exception.
+    []
+  end
+end
+
 def post_reactions(post_id)
-  @client.get_connections(post_id, 'reactions')
+    @client.get_connections(post_id, 'reactions')
 end
 
 def post_comments(post_id)
@@ -24,6 +34,11 @@ STDIN.each_line do |line|
 
   page_posts(page_id, limit).each do |post|
     progressbar.increment
+
+    if post['type'] == 'photo'
+      tags = photo_tags(post['id'].split('_')[1])
+    end
+
     common_info = "#{page_id},#{post['id'].split('_')[1]},#{post['type']}"
 
     post_reactions(post['id']).each do |reaction|
