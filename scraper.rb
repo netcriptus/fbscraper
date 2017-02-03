@@ -1,8 +1,10 @@
 require 'koala'
+require 'ruby-progressbar'
 
 app_token = '1026238860854081|fvTV03tYC4zTMrZ-TbvZORzUjMg'
 @client = Koala::Facebook::API.new(app_token)
-output = STDOUT
+filename = Time.now.getutc.to_s + '.csv'
+output = File.open('output/' + filename, 'w')
 
 def page_posts(page_id, limit)
   @client.get_connections(page_id, 'posts', {limit: limit, fields:['type']})
@@ -18,8 +20,10 @@ end
 
 STDIN.each_line do |line|
   page_id, limit = line.strip.split(',')
+  progressbar = ProgressBar.create(format: 'Fetching posts %c/%C|%b>%i|', length: 80, total: limit.to_i)
 
   page_posts(page_id, limit).each do |post|
+    progressbar.increment
     common_info = "#{page_id},#{post['id'].split('_')[1]},#{post['type']}"
 
     post_reactions(post['id']).each do |reaction|
@@ -30,4 +34,5 @@ STDIN.each_line do |line|
       output.write("#{comment['from']['id']},#{common_info},comment\n")
     end
   end
+  progressbar.finish
 end
